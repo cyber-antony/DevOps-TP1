@@ -1,0 +1,49 @@
+volumes:
+  db_data: # persistentes Volume für die Datenbank
+
+networks:
+  tasknet: # gemeinsamer Netzwerkname
+    driver: bridge # Standard-Netzwerktreiber von Docker
+
+services:
+  db: # PostgreSQL-Datenbank
+    image: postgres:16 # offizielles PostgreSQL-Image
+    container_name: task-db # Name des DB-Containers
+    environment: # Umgebungsvariablen für die Initialisierung der Datenbank
+      POSTGRES_DB: ${DB_NAME:-taskdb} # Name der Datenbank
+      POSTGRES_USER: ${DB_USER:-taskuser} # Datenbankbenutzer
+      POSTGRES_PASSWORD: ${DB_PASS:-taskpass} # Passwort der Datenbank
+    volumes:
+      - db_data:/var/lib/postgresql/data # persistentes Volume
+    networks:
+      - tasknet # Netzwerk des Containers
+    restart: unless-stopped # automatischer Neustart bei Fehlern
+
+  taskmanager: # Backend-Anwendung
+    build: ./app # Image aus dem Ordner app bauen
+    container_name: taskmanager # Name des App-Containers
+    environment: # Umgebungsvariablen für die Verbindung zur DB
+      DB_HOST: ${DB_HOST:-db} # Name des DB-Services im Compose-Netzwerk
+      DB_NAME: ${DB_NAME:-taskdb} # Name der Datenbank
+      DB_USER: ${DB_USER:-taskuser} # Datenbankbenutzer
+      DB_PASS: ${DB_PASS:-taskpass} # Passwort der Datenbank
+
+    depends_on:
+      - db # App startet nach der DB
+    networks:
+      - tasknet # Verbindung zum internen Netzwerk
+    restart: unless-stopped # automatischer Neustart bei Fehlern
+
+  web: # nginx-Webserver für das Frontend
+    image: nginx:latest # offizielles nginx-Image
+    container_name: task-web # Name des Web-Containers
+    ports:
+      - "8080:80" # Host-Port 8080 auf Container-Port 80 abbilden
+    volumes:
+      - ./web/index.html:/usr/share/nginx/html/index.html:ro # HTML-Seite readonly einbinden
+      - ./web/nginx.conf:/etc/nginx/conf.d/default.conf:ro # nginx-Konfiguration readonly einbinden
+    depends_on:
+      - taskmanager # Web startet nach der App
+    networks:
+      - tasknet # Verbindung zum internen Netzwerk
+    restart: unless-stopped # automatischer Neustart bei Fehlern

@@ -1,0 +1,2 @@
+flask==3.0.3	# ein leichtgewichtiges Web-Framework für Python
+psycopg2-binary==2.9.9	# Treiber für PostgreSQL
