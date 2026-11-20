@@ -1,0 +1,30 @@
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: taskmanager-postgres-pv
+spec:
+  capacity:
+    storage: 5Gi
+  accessModes:
+    - ReadWriteMany
+  persistentVolumeReclaimPolicy: Retain
+  storageClassName: ""
+  mountOptions:
+    - nfsvers=4.2
+  nfs:
+    server: 192.168.16.2
+    path: /srv/postgres
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: taskmanager-postgres-pvc
+  namespace: taskmanager
+spec:
+  accessModes:
+    - ReadWriteMany
+  resources:
+    requests:
+      storage: 5Gi
+  storageClassName: ""
+  volumeName: taskmanager-postgres-pv

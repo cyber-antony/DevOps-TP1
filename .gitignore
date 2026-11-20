@@ -1,0 +1,31 @@
+# Secrets and local environment
+.env
+*.env
+secrets/
+ansible/secrets/
+vault_pass*
+kubeconfig*
+*.key
+*.pem
+
+# Python
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.venv/
+venv/
+
+# Terraform
+.terraform/
+terraform.tfstate*
+*.tfvars
+
+# Editor / OS
+.vscode/
+.idea/
+.DS_Store
+
+# Logs
+*.log
+
+mkrepo.sh
